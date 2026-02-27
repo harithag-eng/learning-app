@@ -13,9 +13,7 @@ export default function Sidebar() {
         {/* <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold">
           
         </div> */}
-        <div className="font-semibold">
-          FullStackDevelopment Journey by Haritha Gudikandula
-        </div>
+        <div className="font-semibold">StackPrep by Haritha</div>
       </div>
 
       {/* Categories */}
