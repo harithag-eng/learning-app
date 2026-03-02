@@ -9,7 +9,7 @@ interface UIState {
 }
 
 const initialState: UIState = {
-  selectedCategorySlug: "React",
+  selectedCategorySlug: "dashboard",
   searchTerm: "",
   page: 1,
   limit: 5,

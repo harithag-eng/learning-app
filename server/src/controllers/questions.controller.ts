@@ -134,10 +134,15 @@ export const updateQuestion = async (
       return res.status(400).json({ message: "Invalid id" });
 
     const body = updateSchema.parse(req.body);
-
+    console.log("SQL params:", [
+      body.question,
+      body.answer,
+      body.difficulty ?? null,
+      id,
+    ]);
     const [result] = await pool.query<any>(
       "UPDATE questions SET question = ?, answer = ?, difficulty = COALESCE(?, difficulty) WHERE id = ?",
-      [body.question, body.answer, id],
+      [body.question, body.answer, body.difficulty ?? null, id],
     );
 
     if (result.affectedRows === 0) {

@@ -11,6 +11,7 @@ import {
 } from "./features/questions/questionsSlice";
 import ProfileMenu from "./components/ProfileMenu";
 import Swal from "sweetalert2";
+import Dashboard from "./components/Dashboard";
 export default function MainPage() {
   const dispatch = useAppDispatch();
   const ui = useAppSelector((s) => s.ui);
@@ -20,11 +21,13 @@ export default function MainPage() {
   const categories = useAppSelector((s) => s.categories.items);
   const selectedSlug = useAppSelector((s) => s.ui.selectedCategorySlug);
   const selectedCategory = categories.find((cat) => cat.slug === selectedSlug);
+  const isDashboard = selectedSlug === "dashboard";
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
   useEffect(() => {
+    if (ui.selectedCategorySlug === "dashboard") return;
     dispatch(fetchQuestions());
   }, [dispatch, ui.selectedCategorySlug, ui.searchTerm, ui.page, ui.limit]);
 
@@ -40,81 +43,92 @@ export default function MainPage() {
             <div className="flex items-center gap-3">
               {/* <span className="text-2xl">⚛️</span> */}
               <h1 className="text-xl font-semibold text-gray-800">
-                {selectedCategory?.name || "All"} Interview Questions
+                {isDashboard
+                  ? "My Dashboard"
+                  : `${selectedCategory?.name || "All"} Interview Questions`}
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
               <ProfileMenu />
-
-              <button
-                type="button"
-                disabled={saving}
-                className="px-4 py-2 rounded-md bg-teal-700 text-white disabled:opacity-60"
-                onClick={async () => {
-                  const { value: formValues } = await Swal.fire({
-                    title: "Add Question",
-                    html: `
+              {!isDashboard && (
+                <button
+                  type="button"
+                  disabled={saving}
+                  className="px-4 py-2 rounded-md bg-teal-700 text-white disabled:opacity-60"
+                  onClick={async () => {
+                    const { value: formValues } = await Swal.fire({
+                      title: "Add Question",
+                      html: `
       <input id="swal-question" class="swal2-input" placeholder="Enter question" />
       <textarea id="swal-answer" class="swal2-textarea" placeholder="Enter answer (optional)"></textarea>
     `,
-                    focusConfirm: false,
-                    showCancelButton: true,
-                    confirmButtonText: "Save",
-                    cancelButtonText: "Cancel",
-                    preConfirm: () => {
-                      const question = (
-                        document.getElementById(
-                          "swal-question",
-                        ) as HTMLInputElement
-                      )?.value?.trim();
-                      const answer = (
-                        document.getElementById(
-                          "swal-answer",
-                        ) as HTMLTextAreaElement
-                      )?.value?.trim();
+                      focusConfirm: false,
+                      showCancelButton: true,
+                      confirmButtonText: "Save",
+                      cancelButtonText: "Cancel",
+                      preConfirm: () => {
+                        const question = (
+                          document.getElementById(
+                            "swal-question",
+                          ) as HTMLInputElement
+                        )?.value?.trim();
+                        const answer = (
+                          document.getElementById(
+                            "swal-answer",
+                          ) as HTMLTextAreaElement
+                        )?.value?.trim();
 
-                      if (!question) {
-                        Swal.showValidationMessage("Question is required");
-                        return;
-                      }
+                        if (!question) {
+                          Swal.showValidationMessage("Question is required");
+                          return;
+                        }
 
-                      return { question, answer: answer || "" };
-                    },
-                  });
-
-                  if (!formValues) return;
-
-                  const res = await dispatch(addQuestion(formValues));
-
-                  // Optional: show success message
-                  if (addQuestion.fulfilled.match(res)) {
-                    Swal.fire({
-                      icon: "success",
-                      title: "Saved!",
-                      text: "Question added successfully.",
-                      timer: 1200,
-                      showConfirmButton: false,
+                        return { question, answer: answer || "" };
+                      },
                     });
-                  } else {
-                    Swal.fire({
-                      icon: "error",
-                      title: "Error",
-                      text: "Failed to add question.",
-                    });
-                  }
-                }}
-              >
-                {saving ? "Saving..." : "+ Add Question"}
-              </button>
+
+                    if (!formValues) return;
+
+                    const res = await dispatch(addQuestion(formValues));
+
+                    // Optional: show success message
+                    if (addQuestion.fulfilled.match(res)) {
+                      Swal.fire({
+                        icon: "success",
+                        title: "Saved!",
+                        text: "Question added successfully.",
+                        timer: 1200,
+                        showConfirmButton: false,
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Failed to add question.",
+                      });
+                    }
+                  }}
+                >
+                  {saving ? "Saving..." : "+ Add Question"}
+                </button>
+              )}
             </div>
           </div>
 
           <div className="p-8">
-            {saveError && (
-              <div className="text-red-500 mb-4">Save Error: {saveError}</div>
+            {isDashboard ? (
+              <Dashboard />
+            ) : (
+              <>
+                {saveError && (
+                  <div className="text-red-500 mb-4">
+                    Save Error: {saveError}
+                  </div>
+                )}
+                <QuestionAccordion />
+              </>
             )}
-            <QuestionAccordion />
           </div>
         </div>
       </div>
