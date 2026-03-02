@@ -5,6 +5,7 @@ export default function Sidebar() {
   const dispatch = useAppDispatch();
   const categories = useAppSelector((s) => s.categories.items);
   const selected = useAppSelector((s) => s.ui.selectedCategorySlug);
+  const dashboardActive = selected === "dashboard";
 
   return (
     <aside className="w-64 bg-white border-r h-screen flex flex-col">
@@ -15,9 +16,22 @@ export default function Sidebar() {
         </div> */}
         <div className="font-semibold">StackPrep by Haritha</div>
       </div>
-
-      {/* Categories */}
       <div className="p-3 space-y-2">
+        {/* ✅ Dashboard (static) */}
+        <button
+          onClick={() => dispatch(setCategory("dashboard"))}
+          className={[
+            "w-full text-left px-3 py-2 rounded-md flex items-center gap-2 transition",
+            dashboardActive
+              ? "bg-blue-50 text-blue-700 border border-blue-200"
+              : "hover:bg-gray-50 text-gray-700",
+          ].join(" ")}
+        >
+          <span className="text-blue-500">📊</span>
+          <span className="font-medium">Dashboard</span>
+        </button>
+        {/* Categories */}
+
         {categories.length === 0 ? (
           <div className="text-gray-500 text-sm">Loading categories...</div>
         ) : (
